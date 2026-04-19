@@ -1,3 +1,4 @@
+from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 from typing import Optional
@@ -8,6 +9,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
+    APP_NAME: str = "AI Powered Need Detection and Volunteer Matching"
     NODE_ENV: str = "dev"
     DB_DEV: Optional[str] = None
     DB_LOCAL: Optional[str] = None
@@ -15,6 +17,13 @@ class Settings(BaseSettings):
     DB_NAME: str
     SECRET_KEY: str
     ALGORITHM: str
+    BREVO_API_KEY: Optional[str] = None
+    EMAIL_BREVO_API_KEY: Optional[str] = None
+    EMAIL_FROM: Optional[str] = None
+    BREVO_SENDER_EMAIL: Optional[str] = None
+    BREVO_SENDER_NAME: str = "Support Team"
+    FRONTEND_URL: Optional[str] = None
+    RESET_PASSWORD_URL: Optional[str] = None
 
     model_config = SettingsConfigDict(env_file=str(PROJECT_ROOT / ".env"), extra="ignore")
 
@@ -35,5 +44,24 @@ class Settings(BaseSettings):
 
         return db_connection_uri[self.env]
 
+    @property
+    def brevo_api_key(self) -> Optional[str]:
+        return self.EMAIL_BREVO_API_KEY or self.BREVO_API_KEY
 
-settings = Settings()
+    @property
+    def reset_password_url(self) -> str:
+        if self.RESET_PASSWORD_URL:
+            return self.RESET_PASSWORD_URL
+
+        if self.FRONTEND_URL:
+            return f"{self.FRONTEND_URL.rstrip('/')}/reset-password"
+
+        return "http://localhost:3000/reset-password"
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()
+
+
+settings = get_settings()

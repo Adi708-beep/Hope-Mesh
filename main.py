@@ -1,9 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from app.db.db import client
 from app.routers.authRouter import router as auth_router
+from app.api.v1.routes.email import router as email_router
+from app.core.config import get_settings
+from app.services.email.sendEmail import send_email
 
-app = FastAPI()
+settings = get_settings()
+app = FastAPI(title=settings.APP_NAME)
 app.include_router(auth_router)
+app.include_router(email_router)
 
 
 @app.on_event("startup")
@@ -14,3 +19,17 @@ async def startup_db_ping():
 @app.get("/")
 def root():
     return {"message": "API is working!"}
+
+
+@app.post("/send-test-email")
+def send_test_email():
+    try:
+        send_email(
+            to_email="student@example.com",
+            to_name="Student",
+            subject="Welcome",
+            html_content="<h1>Hello from Brevo</h1>",
+        )
+        return {"ok": True}
+    except Exception as error:
+        raise HTTPException(status_code=500, detail=str(error))

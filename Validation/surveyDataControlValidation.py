@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class SurveyDataControlValidationSchema(BaseModel):
+    submitted_by: str = Field(..., min_length=1, max_length=128)
+
     name: Optional[str] = Field(default=None, min_length=1, max_length=100)
     phone_number: Optional[str] = Field(default=None, min_length=7, max_length=20)
     email: Optional[str] = Field(default=None, min_length=5, max_length=254)
@@ -12,7 +14,6 @@ class SurveyDataControlValidationSchema(BaseModel):
     location: str = Field(..., min_length=3, max_length=300)
     city_area: str = Field(..., min_length=2, max_length=100)
     pin_code: str = Field(..., min_length=4, max_length=10)
-    submitted_by: Literal["NGO", "Volunteer", "Citizen"]
 
     need_type: Literal[
         "Food shortage",
@@ -59,7 +60,14 @@ class SurveyDataControlValidationSchema(BaseModel):
 
         return cleaned_value
 
-    @field_validator("location", "city_area", "pin_code", "description", mode="before")
+    @field_validator(
+        "submitted_by",
+        "location",
+        "city_area",
+        "pin_code",
+        "description",
+        mode="before",
+    )
     @classmethod
     def strip_required_strings(cls, value: str) -> str:
         cleaned_value = value.strip()

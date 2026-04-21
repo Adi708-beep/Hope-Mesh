@@ -35,6 +35,7 @@ async def signup_user(data):
         "user_id": user_id,
         "name": data.name,
         "email": data.email,
+        "skill": data.skill,
         "password": hash_password(data.password)
     }
 

@@ -6,7 +6,6 @@ from fastapi import HTTPException
 
 from app.db.db import survey_data_control_collection
 from app.services.ai import analyze_survey_needs
-from app.services.matching.VolunteerMatching import rank_volunteers_for_document
 
 
 def _normalize_ai_analysis(ai_analysis):
@@ -102,9 +101,9 @@ def _build_default_auto_match_result(document: Dict[str, Any], normalized_ai: Di
     if processing_status == "failed":
         message = "Auto AI matching skipped because AI need analysis failed"
     elif processing_status == "processed":
-        message = "Auto AI matching is in progress"
+        message = "AI analysis completed. Click Auto Match to rank volunteers"
     else:
-        message = "Auto AI matching is pending"
+        message = "AI analysis is pending before auto matching"
 
     return {
         "message": message,
@@ -141,6 +140,13 @@ def _serialize_survey_data_control(document):
 async def _process_survey_ai(inserted_id, survey_data):
     try:
         ai_result = await analyze_survey_needs(survey_data)
+        processed_document = {
+            **survey_data,
+            "_id": inserted_id,
+            "processing_status": "processed",
+            "ai_analysis": ai_result,
+        }
+
         await survey_data_control_collection.update_one(
             {"_id": inserted_id},
             {
@@ -148,34 +154,10 @@ async def _process_survey_ai(inserted_id, survey_data):
                     "ai_analysis": ai_result,
                     "processing_status": "processed",
                     "processed_at": datetime.now(timezone.utc),
-                }
-            },
-        )
-
-        processed_document = await survey_data_control_collection.find_one({"_id": inserted_id})
-        if not processed_document:
-            return
-
-        try:
-            auto_match_result = await rank_volunteers_for_document(
-                need_document=processed_document,
-                ngo_id=str(survey_data.get("ngo_id") or ""),
-                max_volunteers=50,
-                max_ranked_results=10,
-            )
-        except Exception:
-            auto_match_result = _build_default_auto_match_result(
-                processed_document,
-                _normalize_ai_analysis(processed_document.get("ai_analysis")),
-            )
-            auto_match_result["message"] = "Auto AI matching failed"
-
-        await survey_data_control_collection.update_one(
-            {"_id": inserted_id},
-            {
-                "$set": {
-                    "auto_match_result": auto_match_result,
-                    "auto_matched_at": datetime.now(timezone.utc),
+                    "auto_match_result": _build_default_auto_match_result(
+                        processed_document,
+                        _normalize_ai_analysis(ai_result),
+                    ),
                 }
             },
         )

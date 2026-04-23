@@ -1,6 +1,7 @@
 import asyncio
 import json
 import re
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 from bson import ObjectId
@@ -504,9 +505,25 @@ async def rank_volunteers_for_document(
 
 async def rank_volunteers_for_need(data, ngo_id: str) -> Dict[str, Any]:
     need_document = await _fetch_need_document(data, ngo_id)
-    return await rank_volunteers_for_document(
+    ranked_result = await rank_volunteers_for_document(
         need_document=need_document,
         ngo_id=ngo_id,
         max_volunteers=data.max_volunteers,
         max_ranked_results=data.max_ranked_results,
     )
+
+    if need_document.get("_id") is not None:
+        await survey_data_control_collection.update_one(
+            {
+                "_id": need_document["_id"],
+                "ngo_id": ngo_id,
+            },
+            {
+                "$set": {
+                    "auto_match_result": ranked_result,
+                    "auto_matched_at": datetime.now(timezone.utc),
+                }
+            },
+        )
+
+    return ranked_result

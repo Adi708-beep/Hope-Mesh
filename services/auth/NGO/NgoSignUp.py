@@ -2,7 +2,8 @@ from fastapi import HTTPException
 import re
 
 from app.db.db import users_collection, ngo_collection
-from app.core.security import hash_password, verify_password, create_access_token
+from app.core.security import hash_password
+from app.services.auth.user_id import generate_next_user_id
 
 
 def _build_ngo_id_prefix(name: str) -> str:
@@ -36,15 +37,19 @@ async def signup_ngo(data):
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
 
+    user_id = await generate_next_user_id(role="NGO")
+
     # 1. create user (admin)
     user = {
+        "user_id": user_id,
         "name": data.name,
         "email": data.email,
-        "password": hash_password(data.password)
+        "password": hash_password(data.password),
+        "role": "ngo_admin",
     }
 
     user_result = await users_collection.insert_one(user)
-    user_id = str(user_result.inserted_id)
+    admin_db_id = str(user_result.inserted_id)
     ngo_id = await _generate_next_ngo_id(data.name)
 
     # 2. create NGO with admin_id
@@ -52,7 +57,8 @@ async def signup_ngo(data):
         "name": data.name,
         "address": data.address,
         "description": data.description,
-        "admin_id": user_id,
+        "admin_id": admin_db_id,
+        "admin_user_id": user_id,
         "ngo_id": ngo_id,
     }
 
@@ -61,4 +67,5 @@ async def signup_ngo(data):
     return {
         "message": "NGO created with admin",
         "ngo_id": ngo_id,
+        "user_id": user_id,
     }

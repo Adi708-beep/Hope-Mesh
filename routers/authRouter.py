@@ -1,12 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.models.Users.signUpSchema import UserSignUpSchema
 from app.models.NGO.signUpSchema import NgoSignUpSchema
+from app.models.NGO.memberSignUpSchema import NgoMemberSignUpSchema
+from app.models.Staff.signUpSchema import StaffSignUpSchema
+from app.models.Volunteer.signUpSchema import VolunteerSignUpSchema
 from app.models.logInSchema import loginSchema
 from app.Validation.forgotPasswordValidation import ForgotPasswordValidationSchema
 from app.Validation.resetPasswordValidation import ResetPasswordValidationSchema
 from app.models.token import Token
 from app.services.auth.Users.userSignUp import signup_user
 from app.services.auth.NGO.NgoSignUp import signup_ngo
+from app.services.auth.Staff.StaffSignUp import signup_staff
+from app.services.auth.Volunteer.VolunteerSignUp import signup_volunteer
 from app.services.auth.LogIn import login_user
 from app.services.auth.ForgotPassword import forgot_password
 from app.services.auth.ResetPassword import (
@@ -25,6 +30,44 @@ async def register_user(data: UserSignUpSchema):
 @router.post("/signup/ngo")
 async def register_ngo(data: NgoSignUpSchema):
     return await signup_ngo(data)
+
+
+@router.post("/signup/staff")
+async def register_staff(data: StaffSignUpSchema):
+    return await signup_staff(data)
+
+
+@router.post("/signup/volunteer")
+async def register_volunteer(data: VolunteerSignUpSchema):
+    return await signup_volunteer(data)
+
+
+@router.post("/signup/ngo-member")
+async def register_ngo_member(data: NgoMemberSignUpSchema):
+    if data.identity_type == "staff":
+        staff_payload = StaffSignUpSchema(
+            name=data.name,
+            email=data.email,
+            password=data.password,
+            ngo_id=data.ngo_id,
+            designation=data.designation,
+            contact_number=data.contact_number,
+        )
+        return await signup_staff(staff_payload)
+
+    if not data.skill:
+        raise HTTPException(status_code=400, detail="skill is required for volunteer signup")
+
+    volunteer_payload = VolunteerSignUpSchema(
+        name=data.name,
+        email=data.email,
+        password=data.password,
+        ngo_id=data.ngo_id,
+        skill=data.skill,
+        contact_number=data.contact_number,
+        location=data.location,
+    )
+    return await signup_volunteer(volunteer_payload)
 
 
 @router.post("/login", response_model=Token)

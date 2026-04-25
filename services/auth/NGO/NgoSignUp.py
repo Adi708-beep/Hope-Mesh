@@ -1,9 +1,11 @@
+
 from fastapi import HTTPException
 import re
 
 from app.db.db import users_collection, ngo_collection
 from app.core.security import hash_password
 from app.services.auth.user_id import generate_next_user_id
+from Validation.ngoProfileValidation import NGOProfileValidationSchema
 
 
 def _build_ngo_id_prefix(name: str) -> str:
@@ -31,32 +33,40 @@ async def _generate_next_ngo_id(name: str) -> str:
     return f"{prefix}_{max_number + 1:02d}"
 
 
-async def signup_ngo(data):
 
-    existing = await users_collection.find_one({"email": data.email})
+async def signup_ngo(data):
+    # Validate input data
+    validated_data = NGOProfileValidationSchema(**data.dict())
+
+
+    existing = await users_collection.find_one({"email": validated_data.email})
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
+
 
     user_id = await generate_next_user_id(role="NGO")
 
     # 1. create user (admin)
+
     user = {
         "user_id": user_id,
-        "name": data.name,
-        "email": data.email,
-        "password": hash_password(data.password),
+        "name": validated_data.name,
+        "email": validated_data.email,
+        "password": hash_password(validated_data.password),
         "role": "ngo_admin",
     }
 
     user_result = await users_collection.insert_one(user)
     admin_db_id = str(user_result.inserted_id)
-    ngo_id = await _generate_next_ngo_id(data.name)
+
+    ngo_id = await _generate_next_ngo_id(validated_data.name)
 
     # 2. create NGO with admin_id
+
     ngo = {
-        "name": data.name,
-        "address": data.address,
-        "description": data.description,
+        "name": validated_data.name,
+        "address": validated_data.address,
+        "description": validated_data.description,
         "admin_id": admin_db_id,
         "admin_user_id": user_id,
         "ngo_id": ngo_id,

@@ -8,11 +8,15 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start" : "npm run dev"
+    "start": "npm run dev"
   },
   "dependencies": {
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.11.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.14.2",
+    "recharts": "^3.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",

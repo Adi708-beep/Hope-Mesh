@@ -5,7 +5,7 @@ import re
 from app.db.db import users_collection, ngo_collection
 from app.core.security import hash_password
 from app.services.auth.user_id import generate_next_user_id
-from Validation.ngoProfileValidation import NGOProfileValidationSchema
+from app.Validation.ngoProfileValidation import NGOProfileValidationSchema
 
 
 def _build_ngo_id_prefix(name: str) -> str:

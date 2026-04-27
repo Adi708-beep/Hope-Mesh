@@ -4,7 +4,7 @@ import re
 from app.db.db import staff_collection, users_collection, ngo_collection
 from app.core.security import hash_password
 from app.services.auth.user_id import generate_next_ngo_member_id
-from Validation.staffProfileValidation import StaffProfileValidationSchema
+from app.Validation.staffProfileValidation import StaffProfileValidationSchema
 
 
 

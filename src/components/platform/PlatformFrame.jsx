@@ -177,9 +177,9 @@ export const PanelFrame = ({ page, children }) => {
                     {
                       label: "Sign out",
                       icon: LogOut,
-                      onClick: () => {
-                        logout();
-                        navigate("/login");
+                      onClick: async () => {
+                        await logout();
+                        navigate("/", { replace: true });
                       },
                     },
                   ]}

@@ -73,6 +73,11 @@ const roleSelectionCards = [
     href: "/signup/ngo",
   },
   {
+    title: "Join as Staff",
+    description: "Join an NGO as staff, coordinate internal work, and access the operations dashboard.",
+    href: "/signup/staff",
+  },
+  {
     title: "Join as Volunteer",
     description: "Create a verified volunteer profile, join missions, and track your contribution history.",
     href: "/signup/volunteer",
@@ -229,9 +234,18 @@ export const sitePages = {
     layout: "auth",
     variant: "signupVolunteer",
     title: "Create your volunteer profile",
-    summary: "Introduce your skills and connect with organizations that need your help.",
+    summary: "Join an NGO with your skill profile and start contributing immediately.",
     navItems: authNav,
-    checklist: ["Personal details", "Skills", "NGO joining section"],
+    checklist: ["Personal details", "NGO linking", "Skills"],
+  }),
+  staffSignup: pageFactory({
+    path: "/signup/staff",
+    layout: "auth",
+    variant: "signupStaff",
+    title: "Create your staff profile",
+    summary: "Join an NGO team and start managing operations from the staff dashboard.",
+    navItems: authNav,
+    checklist: ["Personal details", "NGO linking", "Role details"],
   }),
   ngoDashboard: pageFactory({
     path: "/ngo/dashboard",

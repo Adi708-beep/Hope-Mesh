@@ -1,12 +1,44 @@
-# React + Vite
+# Hope Mesh Frontend (React + Vite)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Run locally
 
-Currently, two official plugins are available:
+1. Install dependencies:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm install
+```
 
-## Expanding the ESLint configuration
+2. Copy environment file and adjust values if needed:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+cp .env.example .env
+```
+
+3. Start frontend:
+
+```bash
+npm run dev
+```
+
+## Backend connectivity
+
+- Frontend API calls use `VITE_API_BASE_URL`.
+- Default value is `/api` and Vite proxies it to `VITE_DEV_BACKEND_URL`.
+- Default proxy target is `http://127.0.0.1:8000`.
+
+Examples:
+
+- Local development:
+	- `VITE_API_BASE_URL=/api`
+	- `VITE_DEV_BACKEND_URL=http://127.0.0.1:8000`
+- Direct production API URL:
+	- `VITE_API_BASE_URL=https://api.example.com`
+
+## Auth endpoints wired in UI
+
+- `POST /auth/login`
+- `POST /auth/signup/ngo`
+- `POST /auth/signup/volunteer`
+- `POST /auth/forgot-password`
+- `POST /auth/reset-password`
+- `GET /auth/reset-password/validate`

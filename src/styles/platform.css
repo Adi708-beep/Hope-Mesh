@@ -15,6 +15,13 @@
   --platform-radius-xl: 32px;
   --platform-radius-lg: 24px;
   --platform-radius-md: 18px;
+  --text-hero: clamp(2.5rem, 6vw, 5rem);
+  --text-h1: clamp(1.75rem, 4vw, 3rem);
+  --text-h2: clamp(1.4rem, 3vw, 2rem);
+  --text-h3: 1.25rem;
+  --text-body: 1rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
 }
 
 * {
@@ -27,8 +34,52 @@ body {
     radial-gradient(circle at top, rgba(79, 70, 229, 0.16), transparent 24%),
     linear-gradient(180deg, var(--platform-bg) 0%, var(--platform-bg-2) 100%);
   color: var(--platform-text);
-  font-family: "Inter", sans-serif;
+  font-family: "DM Sans", "Plus Jakarta Sans", system-ui, sans-serif;
   overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Cal Sans", "Clash Display", "DM Sans", sans-serif;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+}
+
+.glass-card {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.glow-indigo {
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-border {
+  background: linear-gradient(#1e293b, #1e293b) padding-box,
+              linear-gradient(135deg, #6366f1, #a855f7) border-box;
+  border: 1px solid transparent;
 }
 
 a {
@@ -592,6 +643,8 @@ img {
 }
 
 .platform-main-topbar {
+  position: relative;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -919,6 +972,7 @@ body,
 
 .platform-dropdown-wrap {
   position: relative;
+  z-index: 50;
 }
 
 .platform-dropdown {
@@ -930,7 +984,7 @@ body,
   background: rgba(7, 11, 20, 0.96);
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
   padding: 8px;
-  z-index: 40;
+  z-index: 80;
 }
 
 .platform-dropdown-right {

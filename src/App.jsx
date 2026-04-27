@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import GetStarted from './components/2nd_page/GetStarted'
+import SignOutPage from './components/auth/SignOutPage'
 import PlatformPage from './pages/PlatformPage'
 import { sitePages } from './data/platformRoutes'
 import ProtectedRoute from './components/auth/ProtectedRoute'
@@ -65,7 +66,10 @@ const App = () => {
         ))}
 
         <Route path="/ngos" element={<Navigate to="/directory" replace />} />
+        <Route path="/features" element={<Navigate to="/about" replace />} />
         <Route path="/signup" element={<Navigate to="/role-select" replace />} />
+        <Route path="/sign-out" element={<SignOutPage />} />
+        <Route path="/reset-password" element={<PlatformPage page={sitePages.forgotPassword} />} />
         <Route path="/admin/approvals" element={<Navigate to="/admin/ngo-approvals" replace />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />

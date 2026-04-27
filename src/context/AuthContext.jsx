@@ -2,9 +2,11 @@ import React, { useCallback, useMemo, useState } from "react";
 import { AuthContext } from "./authContextInstance";
 import {
   forgotPasswordRequest,
+  generateNgoMemberRoleIdRequest,
   loginRequest,
   resetPasswordRequest,
   signoutRequest,
+  signupNgoMemberRequest,
   signupNgoRequest,
   signupStaffRequest,
   signupUserRequest,
@@ -19,28 +21,31 @@ const ROLE_ALIASES = {
   NGO: "ngo",
   Volunteer: "volunteer",
   Admin: "admin",
-  Staff: "admin",
+  Staff: "staff",
   ngo: "ngo",
   volunteer: "volunteer",
   admin: "admin",
-  staff: "admin",
+  staff: "staff",
 };
 
 const ROLE_LABELS = {
   ngo: "NGO",
   volunteer: "Volunteer",
   admin: "Admin",
+  staff: "Staff",
 };
 
 const DEMO_CREDENTIALS = {
   NGO: { email: "", password: "" },
   Volunteer: { email: "", password: "" },
+  Staff: { email: "", password: "" },
   Admin: { email: "", password: "" },
 };
 
 const DASHBOARD_BY_ROLE = {
   ngo: "/ngo/dashboard",
   volunteer: "/volunteer/dashboard",
+  staff: "/staff/dashboard",
   admin: "/admin/dashboard",
 };
 
@@ -85,12 +90,12 @@ export function AuthProvider({ children }) {
       };
     }
 
-    if (normalizedRole === "admin" && !normalizedRoleId) {
+    if ((normalizedRole === "admin" || normalizedRole === "staff") && !normalizedRoleId) {
       setIsLoading(false);
       return {
         ok: false,
         success: false,
-        error: "Role ID is required for admin login.",
+        error: "Role ID is required for staff/admin login.",
       };
     }
 
@@ -209,6 +214,34 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const signupNgoMember = useCallback(async (payload) => {
+    try {
+      const response = await signupNgoMemberRequest(payload);
+      return { ok: true, success: true, data: response, error: null };
+    } catch (error) {
+      return {
+        ok: false,
+        success: false,
+        data: null,
+        error: error instanceof ApiError ? error.message : "Unable to create user account.",
+      };
+    }
+  }, []);
+
+  const generateNgoMemberRoleId = useCallback(async (payload) => {
+    try {
+      const response = await generateNgoMemberRoleIdRequest(payload);
+      return { ok: true, success: true, data: response, error: null };
+    } catch (error) {
+      return {
+        ok: false,
+        success: false,
+        data: null,
+        error: error instanceof ApiError ? error.message : "Unable to generate role ID.",
+      };
+    }
+  }, []);
+
   const forgotPassword = useCallback(async (email) => {
     try {
       const response = await forgotPasswordRequest(email);
@@ -298,6 +331,8 @@ export function AuthProvider({ children }) {
       signupUser,
       signupVolunteer,
       signupStaff,
+      signupNgoMember,
+      generateNgoMemberRoleId,
       forgotPassword,
       resetPassword,
       validateResetToken,
@@ -321,6 +356,8 @@ export function AuthProvider({ children }) {
     signupUser,
     signupVolunteer,
     signupStaff,
+    signupNgoMember,
+    generateNgoMemberRoleId,
     forgotPassword,
     resetPassword,
     validateResetToken,

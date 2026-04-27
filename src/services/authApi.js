@@ -35,6 +35,20 @@ export function signupStaffRequest(payload) {
   });
 }
 
+export function signupNgoMemberRequest(payload) {
+  return apiRequest("/auth/signup/ngo-member", {
+    method: "POST",
+    body: payload,
+  });
+}
+
+export function generateNgoMemberRoleIdRequest(payload) {
+  return apiRequest("/auth/signup/ngo-member/generate-role-id", {
+    method: "POST",
+    body: payload,
+  });
+}
+
 export function forgotPasswordRequest(email) {
   return apiRequest("/auth/forgot-password", {
     method: "POST",

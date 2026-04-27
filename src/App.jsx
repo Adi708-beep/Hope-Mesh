@@ -10,9 +10,10 @@ const App = () => {
   const allPages = Object.values(sitePages);
   const extraPages = allPages.filter((page) => page.path !== '/');
 
-  const publicPages = extraPages.filter((page) => !page.path.startsWith('/ngo/') && !page.path.startsWith('/volunteer/') && !page.path.startsWith('/admin/'));
+  const publicPages = extraPages.filter((page) => !page.path.startsWith('/ngo/') && !page.path.startsWith('/volunteer/') && !page.path.startsWith('/staff/') && !page.path.startsWith('/admin/'));
   const ngoPages = extraPages.filter((page) => page.path.startsWith('/ngo/'));
   const volunteerPages = extraPages.filter((page) => page.path.startsWith('/volunteer/'));
+  const staffPages = extraPages.filter((page) => page.path.startsWith('/staff/'));
   const adminPages = extraPages.filter((page) => page.path.startsWith('/admin/'));
 
   return (
@@ -59,6 +60,18 @@ const App = () => {
             path={page.path}
             element={(
               <ProtectedRoute allowedRoles={["Admin"]}>
+                <PlatformPage page={page} />
+              </ProtectedRoute>
+            )}
+          />
+        ))}
+
+        {staffPages.map((page) => (
+          <Route
+            key={page.path}
+            path={page.path}
+            element={(
+              <ProtectedRoute allowedRoles={["Staff"]}>
                 <PlatformPage page={page} />
               </ProtectedRoute>
             )}

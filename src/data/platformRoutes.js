@@ -50,6 +50,14 @@ const volunteerNav = [
   { to: "/volunteer/chat", label: "Chat", icon: MessageSquareMore },
 ];
 
+const staffNav = [
+  { to: "/staff/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/staff/tasks", label: "Tasks", icon: SquareCheckBig },
+  { to: "/staff/chat", label: "Chat", icon: MessageSquareMore },
+  { to: "/staff/analytics", label: "Analytics", icon: ChartNoAxesCombined },
+  { to: "/staff/settings", label: "Settings", icon: MonitorCog },
+];
+
 const adminNav = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/admin/ngo-approvals", label: "Approvals", icon: BadgeCheck },
@@ -73,14 +81,9 @@ const roleSelectionCards = [
     href: "/signup/ngo",
   },
   {
-    title: "Join as Staff",
-    description: "Join an NGO as staff, coordinate internal work, and access the operations dashboard.",
-    href: "/signup/staff",
-  },
-  {
-    title: "Join as Volunteer",
-    description: "Create a verified volunteer profile, join missions, and track your contribution history.",
-    href: "/signup/volunteer",
+    title: "Join as User",
+    description: "Join as volunteer or staff in one role-aware flow where your ID is generated automatically.",
+    href: "/signup/user",
   },
 ];
 
@@ -209,7 +212,7 @@ export const sitePages = {
     title: "Welcome back",
     summary: "Use the tab that matches your access level.",
     navItems: authNav,
-    tabs: ["NGO", "Volunteer", "Admin"],
+    tabs: ["NGO", "Volunteer", "Staff", "Admin"],
     primaryAction: { to: "/forgot-password", label: "Forgot Password" },
   }),
   forgotPassword: pageFactory({
@@ -228,6 +231,15 @@ export const sitePages = {
     summary: "A multi-step onboarding flow for verified NGO accounts.",
     navItems: authNav,
     checklist: ["NGO info", "Organization details", "Verification", "Admin details"],
+  }),
+  userSignup: pageFactory({
+    path: "/signup/user",
+    layout: "auth",
+    variant: "signupUser",
+    title: "Create your user profile",
+    summary: "Choose volunteer or staff and complete one guided onboarding flow.",
+    navItems: authNav,
+    checklist: ["Personal details", "NGO linking", "Role details"],
   }),
   volunteerSignup: pageFactory({
     path: "/signup/volunteer",
@@ -477,6 +489,29 @@ export const sitePages = {
     breadcrumbs: "Volunteer / Chat",
     navItems: volunteerNav,
   }),
+  staffDashboard: pageFactory({
+    path: "/staff/dashboard",
+    layout: "panel",
+    role: "Staff Panel",
+    title: "Staff Dashboard",
+    summary: "Coordinate operations, assigned work, and team updates from one workspace.",
+    breadcrumbs: "Staff / Dashboard",
+    sidebarCopy: "Track NGO operations, task queues, and updates with role-based access.",
+    navItems: staffNav,
+    metrics: [
+      { label: "Assigned Tasks", value: "42", delta: "+6 this week", icon: SquareCheckBig },
+      { label: "Active Events", value: "9", delta: "2 today", icon: CalendarDays },
+      { label: "Volunteer Requests", value: "18", delta: "+3 pending", icon: Users },
+      { label: "Completion Rate", value: "88%", delta: "Above target", icon: Activity },
+    ],
+    chartData: [
+      { name: "Mon", value: 22 },
+      { name: "Tue", value: 30 },
+      { name: "Wed", value: 28 },
+      { name: "Thu", value: 34 },
+      { name: "Fri", value: 39 },
+    ],
+  }),
   adminDashboard: pageFactory({
     path: "/admin/dashboard",
     layout: "panel",
@@ -594,4 +629,4 @@ export const sitePages = {
   }),
 };
 
-export { publicNav, authNav, ngoNav, volunteerNav, adminNav };
+export { publicNav, authNav, ngoNav, volunteerNav, staffNav, adminNav };

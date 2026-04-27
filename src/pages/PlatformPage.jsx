@@ -340,10 +340,7 @@ function AuthPage({ page, isLoading, notify }) {
   const [searchParams] = useSearchParams();
   const {
     login,
-    generateNgoMemberRoleId,
     signupNgo,
-    signupNgoMember,
-    signupStaff,
     signupVolunteer,
     forgotPassword,
     resetPassword,
@@ -368,33 +365,12 @@ function AuthPage({ page, isLoading, notify }) {
   const [volunteerSignupForm, setVolunteerSignupForm] = useState({
     name: "",
     email: "",
+    password: "",
     ngo_id: "",
+    skill: "Food shortage",
     contact_number: "",
     location: "",
-    password: "",
-    skill: "Food shortage",
   });
-  const [staffSignupForm, setStaffSignupForm] = useState({
-    name: "",
-    email: "",
-    ngo_id: "",
-    designation: "Staff",
-    contact_number: "",
-    password: "",
-  });
-  const [userSignupForm, setUserSignupForm] = useState({
-    name: "",
-    email: "",
-    ngo_id: "",
-    identity_type: "volunteer",
-    skill: "Food shortage",
-    designation: "Staff",
-    contact_number: "",
-    location: "",
-    role_id: "",
-    password: "",
-  });
-  const [isGeneratingRoleId, setIsGeneratingRoleId] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [resetForm, setResetForm] = useState({
     token: "",
@@ -406,7 +382,6 @@ function AuthPage({ page, isLoading, notify }) {
   const loginRouteMap = {
     NGO: "/ngo/dashboard",
     Volunteer: "/volunteer/dashboard",
-    Staff: "/staff/dashboard",
     Admin: "/admin/dashboard",
   };
 
@@ -501,21 +476,8 @@ function AuthPage({ page, isLoading, notify }) {
       return;
     }
 
-    const loginResult = await login({
-      role: "NGO",
-      email: ngoSignupForm.email,
-      password: ngoSignupForm.password,
-      remember: true,
-    });
-
-    if (!loginResult.ok) {
-      notify("Signup Complete", result.data?.message || "NGO account created. Please login.", "success");
-      navigate("/login", { replace: true });
-      return;
-    }
-
     notify("Signup Complete", result.data?.message || "NGO account created successfully.", "success");
-    navigate(loginResult.redirectTo || "/ngo/dashboard", { replace: true });
+    navigate("/login", { replace: true });
   };
 
   const handleVolunteerSignup = async () => {
@@ -534,120 +496,8 @@ function AuthPage({ page, isLoading, notify }) {
       return;
     }
 
-    const loginResult = await login({
-      role: "Volunteer",
-      email: volunteerSignupForm.email,
-      password: volunteerSignupForm.password,
-      roleId: result.data?.user_id || result.data?.volunteer_id || "",
-      remember: true,
-    });
-
-    if (!loginResult.ok) {
-      notify("Signup Complete", result.data?.message || "Volunteer account created. Please login.", "success");
-      navigate("/login", { replace: true });
-      return;
-    }
-
     notify("Signup Complete", result.data?.message || "Volunteer account created successfully.", "success");
-    navigate(loginResult.redirectTo || "/volunteer/dashboard", { replace: true });
-  };
-
-  const handleStaffSignup = async () => {
-    const result = await signupStaff({
-      name: staffSignupForm.name,
-      email: staffSignupForm.email,
-      password: staffSignupForm.password,
-      ngo_id: staffSignupForm.ngo_id,
-      designation: staffSignupForm.designation,
-      contact_number: staffSignupForm.contact_number,
-    });
-
-    if (!result.ok) {
-      notify("Signup Failed", result.error, "warning");
-      return;
-    }
-
-    const loginResult = await login({
-      role: "Staff",
-      email: staffSignupForm.email,
-      password: staffSignupForm.password,
-      roleId: result.data?.user_id || result.data?.staff_id || "",
-      remember: true,
-    });
-
-    if (!loginResult.ok) {
-      notify("Signup Complete", result.data?.message || "Staff account created. Please login.", "success");
-      navigate("/login", { replace: true });
-      return;
-    }
-
-    notify("Signup Complete", result.data?.message || "Staff account created successfully.", "success");
-    navigate(loginResult.redirectTo || "/staff/dashboard", { replace: true });
-  };
-
-  const handleUserSignup = async () => {
-    const isVolunteer = userSignupForm.identity_type === "volunteer";
-
-    const payload = {
-      name: userSignupForm.name,
-      email: userSignupForm.email,
-      password: userSignupForm.password,
-      ngo_id: userSignupForm.ngo_id,
-      identity_type: userSignupForm.identity_type,
-      contact_number: userSignupForm.contact_number,
-      location: userSignupForm.location,
-      designation: userSignupForm.designation,
-      skill: userSignupForm.skill,
-      role_id: userSignupForm.role_id,
-    };
-
-    const result = await signupNgoMember(payload);
-
-    if (!result.ok) {
-      notify("Signup Failed", result.error, "warning");
-      return;
-    }
-
-    const generatedRoleId = result.data?.user_id || result.data?.staff_id || result.data?.volunteer_id || "";
-
-    const loginResult = await login({
-      role: isVolunteer ? "Volunteer" : "Staff",
-      email: userSignupForm.email,
-      password: userSignupForm.password,
-      roleId: generatedRoleId,
-      remember: true,
-    });
-
-    if (!loginResult.ok) {
-      notify("Signup Complete", result.data?.message || "User account created. Please login.", "success");
-      navigate("/login", { replace: true });
-      return;
-    }
-
-    notify("Signup Complete", result.data?.message || "User account created successfully.", "success");
-    navigate(loginResult.redirectTo || (isVolunteer ? "/volunteer/dashboard" : "/staff/dashboard"), { replace: true });
-  };
-
-  const handleGenerateRoleId = async () => {
-    if (!userSignupForm.ngo_id.trim()) {
-      notify("Missing NGO ID", "Please enter NGO ID before generating role ID.", "warning");
-      return;
-    }
-
-    setIsGeneratingRoleId(true);
-    const result = await generateNgoMemberRoleId({
-      ngo_id: userSignupForm.ngo_id,
-      identity_type: userSignupForm.identity_type,
-    });
-    setIsGeneratingRoleId(false);
-
-    if (!result.ok) {
-      notify("Role ID Generation Failed", result.error || "Could not generate role ID.", "warning");
-      return;
-    }
-
-    setUserSignupForm((current) => ({ ...current, role_id: result.data?.role_id || "" }));
-    notify("Role ID Generated", `Generated ${result.data?.role_id || "new role ID"}.`, "success");
+    navigate("/login", { replace: true });
   };
 
   const handleForgotPassword = async () => {
@@ -722,7 +572,7 @@ function AuthPage({ page, isLoading, notify }) {
                 <div className="platform-form-grid" style={{ marginTop: 18 }}>
                   <input
                     className="platform-input"
-                    placeholder={selectedLoginRole === "NGO" ? "Email or NGO User ID" : "Email address"}
+                    placeholder="Email address"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                   />
@@ -736,7 +586,7 @@ function AuthPage({ page, isLoading, notify }) {
                   {selectedLoginRole !== "NGO" ? (
                     <input
                       className="platform-input"
-                      placeholder={selectedLoginRole === "Admin" ? "Role ID (required for Admin)" : selectedLoginRole === "Staff" ? "Role ID (required for Staff)" : "Role ID (optional for NGO-linked volunteers)"}
+                      placeholder="Role ID (required for Volunteer/Admin)"
                       value={roleId}
                       onChange={(event) => setRoleId(event.target.value)}
                     />
@@ -805,7 +655,7 @@ function AuthPage({ page, isLoading, notify }) {
               </div>
             ) : null}
 
-            {page.variant === "signupNgo" || page.variant === "signupUser" || page.variant === "signupVolunteer" || page.variant === "signupStaff" ? (
+            {page.variant === "signupNgo" || page.variant === "signupVolunteer" ? (
               <div className="platform-form-grid">
                 <SectionHeader eyebrow="Signup" title={page.title} />
                 <div className="platform-tab-list">
@@ -852,110 +702,7 @@ function AuthPage({ page, isLoading, notify }) {
                       Create NGO Account
                     </button>
                   </>
-                ) : page.variant === "signupUser" ? (
-                  <>
-                    <div className="platform-form-grid" style={{ gap: 8 }}>
-                      <label style={{ color: "rgba(255,255,255,0.7)", fontSize: 14 }}>Identity Type</label>
-                      <div className="platform-tab-list">
-                        <button
-                          className={`platform-tab ${userSignupForm.identity_type === "volunteer" ? "active" : ""}`}
-                          type="button"
-                          onClick={() => setUserSignupForm((current) => ({ ...current, identity_type: "volunteer", role_id: "" }))}
-                        >
-                          Volunteer
-                        </button>
-                        <button
-                          className={`platform-tab ${userSignupForm.identity_type === "staff" ? "active" : ""}`}
-                          type="button"
-                          onClick={() => setUserSignupForm((current) => ({ ...current, identity_type: "staff", role_id: "" }))}
-                        >
-                          Staff
-                        </button>
-                      </div>
-                    </div>
-                    <input
-                      className="platform-input"
-                      placeholder="Full name"
-                      value={userSignupForm.name}
-                      onChange={(event) => setUserSignupForm((current) => ({ ...current, name: event.target.value }))}
-                    />
-                    <input
-                      className="platform-input"
-                      placeholder="Email"
-                      value={userSignupForm.email}
-                      onChange={(event) => setUserSignupForm((current) => ({ ...current, email: event.target.value }))}
-                    />
-                    <input
-                      className="platform-input"
-                      placeholder="NGO ID"
-                      value={userSignupForm.ngo_id}
-                      onChange={(event) => setUserSignupForm((current) => ({ ...current, ngo_id: event.target.value }))}
-                    />
-                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                      <input
-                        className="platform-input"
-                        placeholder={userSignupForm.identity_type === "volunteer" ? "Volunteer Role ID" : "Staff Role ID"}
-                        value={userSignupForm.role_id}
-                        onChange={(event) => setUserSignupForm((current) => ({ ...current, role_id: event.target.value }))}
-                        style={{ flex: 1 }}
-                      />
-                      <button
-                        className="platform-btn ghost"
-                        type="button"
-                        style={{ padding: "10px 12px", minWidth: 96 }}
-                        onClick={handleGenerateRoleId}
-                        disabled={isGeneratingRoleId}
-                      >
-                        {isGeneratingRoleId ? "Generating" : "Generate"}
-                      </button>
-                    </div>
-                    {userSignupForm.identity_type === "volunteer" ? (
-                      <>
-                        <select
-                          className="platform-input"
-                          value={userSignupForm.skill}
-                          onChange={(event) => setUserSignupForm((current) => ({ ...current, skill: event.target.value }))}
-                        >
-                          <option value="Food shortage">Food shortage</option>
-                          <option value="Medical help">Medical help</option>
-                          <option value="Shelter">Shelter</option>
-                          <option value="Education">Education</option>
-                          <option value="Disaster relief">Disaster relief</option>
-                          <option value="Other">Other</option>
-                        </select>
-                        <input
-                          className="platform-input"
-                          placeholder="Location"
-                          value={userSignupForm.location}
-                          onChange={(event) => setUserSignupForm((current) => ({ ...current, location: event.target.value }))}
-                        />
-                      </>
-                    ) : (
-                      <input
-                        className="platform-input"
-                        placeholder="Designation"
-                        value={userSignupForm.designation}
-                        onChange={(event) => setUserSignupForm((current) => ({ ...current, designation: event.target.value }))}
-                      />
-                    )}
-                    <input
-                      className="platform-input"
-                      placeholder="Contact number"
-                      value={userSignupForm.contact_number}
-                      onChange={(event) => setUserSignupForm((current) => ({ ...current, contact_number: event.target.value }))}
-                    />
-                    <input
-                      className="platform-input"
-                      placeholder="Password"
-                      type="password"
-                      value={userSignupForm.password}
-                      onChange={(event) => setUserSignupForm((current) => ({ ...current, password: event.target.value }))}
-                    />
-                    <button className="platform-btn" type="button" onClick={handleUserSignup}>
-                      Create User Account
-                    </button>
-                  </>
-                ) : page.variant === "signupVolunteer" ? (
+                ) : (
                   <>
                     <input
                       className="platform-input"
@@ -1008,49 +755,6 @@ function AuthPage({ page, isLoading, notify }) {
                     />
                     <button className="platform-btn" type="button" onClick={handleVolunteerSignup}>
                       Create Volunteer Account
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <input
-                      className="platform-input"
-                      placeholder="Full name"
-                      value={staffSignupForm.name}
-                      onChange={(event) => setStaffSignupForm((current) => ({ ...current, name: event.target.value }))}
-                    />
-                    <input
-                      className="platform-input"
-                      placeholder="Email"
-                      value={staffSignupForm.email}
-                      onChange={(event) => setStaffSignupForm((current) => ({ ...current, email: event.target.value }))}
-                    />
-                    <input
-                      className="platform-input"
-                      placeholder="NGO ID"
-                      value={staffSignupForm.ngo_id}
-                      onChange={(event) => setStaffSignupForm((current) => ({ ...current, ngo_id: event.target.value }))}
-                    />
-                    <input
-                      className="platform-input"
-                      placeholder="Designation"
-                      value={staffSignupForm.designation}
-                      onChange={(event) => setStaffSignupForm((current) => ({ ...current, designation: event.target.value }))}
-                    />
-                    <input
-                      className="platform-input"
-                      placeholder="Contact number"
-                      value={staffSignupForm.contact_number}
-                      onChange={(event) => setStaffSignupForm((current) => ({ ...current, contact_number: event.target.value }))}
-                    />
-                    <input
-                      className="platform-input"
-                      placeholder="Password"
-                      type="password"
-                      value={staffSignupForm.password}
-                      onChange={(event) => setStaffSignupForm((current) => ({ ...current, password: event.target.value }))}
-                    />
-                    <button className="platform-btn" type="button" onClick={handleStaffSignup}>
-                      Create Staff Account
                     </button>
                   </>
                 )}

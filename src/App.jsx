@@ -1,7 +1,6 @@
 import React from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import GetStarted from './components/2nd_page/GetStarted'
-import SignOutPage from './components/auth/SignOutPage'
 import PlatformPage from './pages/PlatformPage'
 import { sitePages } from './data/platformRoutes'
 import ProtectedRoute from './components/auth/ProtectedRoute'
@@ -10,10 +9,9 @@ const App = () => {
   const allPages = Object.values(sitePages);
   const extraPages = allPages.filter((page) => page.path !== '/');
 
-  const publicPages = extraPages.filter((page) => !page.path.startsWith('/ngo/') && !page.path.startsWith('/volunteer/') && !page.path.startsWith('/staff/') && !page.path.startsWith('/admin/'));
+  const publicPages = extraPages.filter((page) => !page.path.startsWith('/ngo/') && !page.path.startsWith('/volunteer/') && !page.path.startsWith('/admin/'));
   const ngoPages = extraPages.filter((page) => page.path.startsWith('/ngo/'));
   const volunteerPages = extraPages.filter((page) => page.path.startsWith('/volunteer/'));
-  const staffPages = extraPages.filter((page) => page.path.startsWith('/staff/'));
   const adminPages = extraPages.filter((page) => page.path.startsWith('/admin/'));
 
   return (
@@ -66,22 +64,9 @@ const App = () => {
           />
         ))}
 
-        {staffPages.map((page) => (
-          <Route
-            key={page.path}
-            path={page.path}
-            element={(
-              <ProtectedRoute allowedRoles={["Staff"]}>
-                <PlatformPage page={page} />
-              </ProtectedRoute>
-            )}
-          />
-        ))}
-
         <Route path="/ngos" element={<Navigate to="/directory" replace />} />
         <Route path="/features" element={<Navigate to="/about" replace />} />
         <Route path="/signup" element={<Navigate to="/role-select" replace />} />
-        <Route path="/sign-out" element={<SignOutPage />} />
         <Route path="/reset-password" element={<PlatformPage page={sitePages.forgotPassword} />} />
         <Route path="/admin/approvals" element={<Navigate to="/admin/ngo-approvals" replace />} />
 

@@ -2,14 +2,9 @@ import React, { useCallback, useMemo, useState } from "react";
 import { AuthContext } from "./authContextInstance";
 import {
   forgotPasswordRequest,
-  generateNgoMemberRoleIdRequest,
   loginRequest,
   resetPasswordRequest,
-  signoutRequest,
-  signupNgoMemberRequest,
   signupNgoRequest,
-  signupStaffRequest,
-  signupUserRequest,
   signupVolunteerRequest,
   validateResetTokenRequest,
 } from "../services/authApi";
@@ -21,31 +16,28 @@ const ROLE_ALIASES = {
   NGO: "ngo",
   Volunteer: "volunteer",
   Admin: "admin",
-  Staff: "staff",
+  Staff: "admin",
   ngo: "ngo",
   volunteer: "volunteer",
   admin: "admin",
-  staff: "staff",
+  staff: "admin",
 };
 
 const ROLE_LABELS = {
   ngo: "NGO",
   volunteer: "Volunteer",
   admin: "Admin",
-  staff: "Staff",
 };
 
 const DEMO_CREDENTIALS = {
   NGO: { email: "", password: "" },
   Volunteer: { email: "", password: "" },
-  Staff: { email: "", password: "" },
   Admin: { email: "", password: "" },
 };
 
 const DASHBOARD_BY_ROLE = {
   ngo: "/ngo/dashboard",
   volunteer: "/volunteer/dashboard",
-  staff: "/staff/dashboard",
   admin: "/admin/dashboard",
 };
 
@@ -90,12 +82,12 @@ export function AuthProvider({ children }) {
       };
     }
 
-    if ((normalizedRole === "admin" || normalizedRole === "staff") && !normalizedRoleId) {
+    if ((normalizedRole === "volunteer" || normalizedRole === "admin") && !normalizedRoleId) {
       setIsLoading(false);
       return {
         ok: false,
         success: false,
-        error: "Role ID is required for staff/admin login.",
+        error: "Role ID is required for volunteer and admin login.",
       };
     }
 
@@ -172,20 +164,6 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const signupUser = useCallback(async (payload) => {
-    try {
-      const response = await signupUserRequest(payload);
-      return { ok: true, success: true, data: response, error: null };
-    } catch (error) {
-      return {
-        ok: false,
-        success: false,
-        data: null,
-        error: error instanceof ApiError ? error.message : "Unable to create user account.",
-      };
-    }
-  }, []);
-
   const signupVolunteer = useCallback(async (payload) => {
     try {
       const response = await signupVolunteerRequest(payload);
@@ -196,48 +174,6 @@ export function AuthProvider({ children }) {
         success: false,
         data: null,
         error: error instanceof ApiError ? error.message : "Unable to create volunteer account.",
-      };
-    }
-  }, []);
-
-  const signupStaff = useCallback(async (payload) => {
-    try {
-      const response = await signupStaffRequest(payload);
-      return { ok: true, success: true, data: response, error: null };
-    } catch (error) {
-      return {
-        ok: false,
-        success: false,
-        data: null,
-        error: error instanceof ApiError ? error.message : "Unable to create staff account.",
-      };
-    }
-  }, []);
-
-  const signupNgoMember = useCallback(async (payload) => {
-    try {
-      const response = await signupNgoMemberRequest(payload);
-      return { ok: true, success: true, data: response, error: null };
-    } catch (error) {
-      return {
-        ok: false,
-        success: false,
-        data: null,
-        error: error instanceof ApiError ? error.message : "Unable to create user account.",
-      };
-    }
-  }, []);
-
-  const generateNgoMemberRoleId = useCallback(async (payload) => {
-    try {
-      const response = await generateNgoMemberRoleIdRequest(payload);
-      return { ok: true, success: true, data: response, error: null };
-    } catch (error) {
-      return {
-        ok: false,
-        success: false,
-        data: null,
-        error: error instanceof ApiError ? error.message : "Unable to generate role ID.",
       };
     }
   }, []);
@@ -284,20 +220,13 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const logout = useCallback(async () => {
-    const currentToken = auth?.token;
-
-    try {
-      if (currentToken) {
-        await signoutRequest(currentToken);
-      }
-    } catch {
-      // Continue with client-side logout even when backend signout fails.
-    } finally {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
-      setAuth(null);
+  const logout = useCallback(() => {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    setAuth(null);
+    if (typeof window !== "undefined") {
+      window.history.pushState({}, "", "/");
     }
-  }, [auth?.token]);
+  }, []);
 
   const updateProfile = useCallback((data) => {
     setAuth((previous) => {
@@ -328,11 +257,7 @@ export function AuthProvider({ children }) {
       email: auth?.email || null,
       login,
       signupNgo,
-      signupUser,
       signupVolunteer,
-      signupStaff,
-      signupNgoMember,
-      generateNgoMemberRoleId,
       forgotPassword,
       resetPassword,
       validateResetToken,
@@ -353,11 +278,7 @@ export function AuthProvider({ children }) {
     isLoading,
     login,
     signupNgo,
-    signupUser,
     signupVolunteer,
-    signupStaff,
-    signupNgoMember,
-    generateNgoMemberRoleId,
     forgotPassword,
     resetPassword,
     validateResetToken,

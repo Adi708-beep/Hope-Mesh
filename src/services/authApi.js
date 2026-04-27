@@ -14,36 +14,8 @@ export function signupNgoRequest(payload) {
   });
 }
 
-export function signupUserRequest(payload) {
-  return apiRequest("/auth/signup/user", {
-    method: "POST",
-    body: payload,
-  });
-}
-
 export function signupVolunteerRequest(payload) {
   return apiRequest("/auth/signup/volunteer", {
-    method: "POST",
-    body: payload,
-  });
-}
-
-export function signupStaffRequest(payload) {
-  return apiRequest("/auth/signup/staff", {
-    method: "POST",
-    body: payload,
-  });
-}
-
-export function signupNgoMemberRequest(payload) {
-  return apiRequest("/auth/signup/ngo-member", {
-    method: "POST",
-    body: payload,
-  });
-}
-
-export function generateNgoMemberRoleIdRequest(payload) {
-  return apiRequest("/auth/signup/ngo-member/generate-role-id", {
     method: "POST",
     body: payload,
   });
@@ -67,12 +39,5 @@ export function validateResetTokenRequest(token) {
   const query = encodeURIComponent(String(token || "").trim());
   return apiRequest(`/auth/reset-password/validate?token=${query}`, {
     method: "GET",
-  });
-}
-
-export function signoutRequest(token) {
-  return apiRequest("/signout", {
-    method: "POST",
-    token,
   });
 }
